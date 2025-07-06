@@ -1,45 +1,17 @@
 repos:
-  # Code formatter
-  - repo: https://github.com/psf/black
-    rev: 24.4.2  # Check https://github.com/psf/black/tags for latest stable
+-   repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
+    rev: v0.8.0
     hooks:
-      - id: black
+    -   id: pre-commit-update
+
+-   repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+    -   id: black
         language_version: python3
 
-  # Linter and static analysis (much faster than flake8 + plugins)
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4  # Check https://github.com/astral-sh/ruff-pre-commit/tags
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.2
     hooks:
-      - id: ruff
-        args: [--fix]  # auto-fix where possible
-
-  # Detect large files accidentally committed
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: check-added-large-files
-        args: ["--maxkb=500"]  # Customize size as needed
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-yaml
-      - id: check-merge-conflict
-
-  # Prevent committing secrets (like AWS keys or passwords)
-  - repo: https://github.com/awslabs/git-secrets
-    rev: v1.3.0
-    hooks:
-      - id: git-secrets
-
-  # Keep pre-commit hooks up to date
-  - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
-    rev: v1.2.0
-    hooks:
-      - id: check-pre-commit-ci-config
-
-  # Ensure pre-commit config is valid
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: check-pre-commit-config
-
-default_stages: [commit, push]
+    -   id: ruff
+        args: [--no-fix]
