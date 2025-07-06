@@ -1,0 +1,45 @@
+repos:
+  # Code formatter
+  - repo: https://github.com/psf/black
+    rev: 24.4.2  # Check https://github.com/psf/black/tags for latest stable
+    hooks:
+      - id: black
+        language_version: python3
+
+  # Linter and static analysis (much faster than flake8 + plugins)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4  # Check https://github.com/astral-sh/ruff-pre-commit/tags
+    hooks:
+      - id: ruff
+        args: [--fix]  # auto-fix where possible
+
+  # Detect large files accidentally committed
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=500"]  # Customize size as needed
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-merge-conflict
+
+  # Prevent committing secrets (like AWS keys or passwords)
+  - repo: https://github.com/awslabs/git-secrets
+    rev: v1.3.0
+    hooks:
+      - id: git-secrets
+
+  # Keep pre-commit hooks up to date
+  - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
+    rev: v1.2.0
+    hooks:
+      - id: check-pre-commit-ci-config
+
+  # Ensure pre-commit config is valid
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-pre-commit-config
+
+default_stages: [commit, push]
