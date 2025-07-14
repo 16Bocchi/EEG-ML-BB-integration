@@ -65,27 +65,19 @@ class BinauralBeatGenerator:
             ramp_duration (float, default = 2): Duration in seconds for frequency
                 ramping.
         """
-        # Audio Sample rate (Typically 44.1kHz)
         self.sample_rate = sample_rate
 
-        # The carrier (base) frequency for the binaural beat
         self.carrier_freq = carrier_freq
-        # The frequency of the perceived beat
         self.beat_freq = beat_freq
-        # The waveform of the beat
         self.waveform = waveform
-        # The amplitude (volume)
         self.amplitude = amplitude
 
-        # The target carrier (base) and beat frequency to change to
         self.target_carrier_freq = carrier_freq
         self.target_beat_freq = beat_freq
         self.target_amplitude = amplitude
-        # The duration of change of carrier (base) and beat
         self.ramp_duration = ramp_duration
         self.ramp_progress = 0.0
 
-        # The current phase (progress through waveform)
         self.phase_left = 0
         self.phase_right = 0
 
