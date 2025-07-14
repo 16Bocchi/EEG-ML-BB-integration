@@ -1,6 +1,7 @@
 import threading
 from typing import Literal
 
+import colorednoise
 import numpy as np
 import sounddevice as sd
 from scipy import signal
@@ -20,6 +21,10 @@ class BinauralBeatGenerator:
         beat_freq (float): Current beat frequency (Hz).
         waveform (Literal["sine", "square", "saw"]): Current waveform type.
         amplitude (float): The amplitude (volume) of the beat
+        noise_type (Literal["none", "white", "pink", "brown"]): The type of noise to add
+            as a base.
+        noise_amplitude (float): The amplitude of noise.
+        noise_multipliter (float): How noisy the noise should be.
         target_carrier_freq (float): Target carrier frequency for ramping.
         target_beat_freq (float): Target beat frequency for ramping.
         target_amplitude (float): Target amplitude (volume) of the beat
@@ -36,6 +41,9 @@ class BinauralBeatGenerator:
     beat_freq: float
     waveform: Literal["sine", "square", "saw"]
     amplitude: float
+    noise_type: Literal["none", "white", "pink", "brown"]
+    noise_amplitude: float
+    noise_multiplier: float
     target_carrier_freq: float
     target_beat_freq: float
     target_amplitude: float
@@ -54,6 +62,9 @@ class BinauralBeatGenerator:
         waveform: Literal["sine", "square", "saw"] = "sine",
         amplitude: float = 0.2,
         ramp_duration: float = 2,
+        noise_type: Literal["none", "white", "pink", "brown"] = "none",
+        noise_amplitude: float = 0.1,
+        noise_multiplier: float = 0.5,
     ) -> None:
         """
         Initialises the binaural beat generator.
@@ -64,6 +75,10 @@ class BinauralBeatGenerator:
             waveform (Literal["sine", "square", "saw"], default = "sine): Waveform type.
             ramp_duration (float, default = 2): Duration in seconds for frequency
                 ramping.
+            noise_type (Literal["none", "white", "pink", "brown"], default = "none"):
+                The type of noise to add as a base.
+            noise_amplitude (float, default = 0.1): The amplitude of noise.
+            noise_multipliter (float, default = 0.5): How noisy the noise should be.
         """
         self.sample_rate = sample_rate
 
@@ -71,6 +86,10 @@ class BinauralBeatGenerator:
         self.beat_freq = beat_freq
         self.waveform = waveform
         self.amplitude = amplitude
+
+        self.noise_type = noise_type
+        self.noise_amplitude = noise_amplitude
+        self.noise_multiplier = noise_multiplier
 
         self.target_carrier_freq = carrier_freq
         self.target_beat_freq = beat_freq
@@ -141,6 +160,17 @@ class BinauralBeatGenerator:
             self.target_amplitude = max(0.0, min(new_amplitude, 1.0))  # Clamp 0..1
             self.ramp_progress = 0.0
 
+    def update_noise(
+        self,
+        new_noise_type: Literal["none", "white", "pink", "brown"],
+        new_noise_amplitude: float = 0.1,
+        new_noise_multiplier: float = 0.5,
+    ) -> None:
+        with self.lock:
+            self.noise_type = new_noise_type
+            self.noise_amplitude = np.clip(new_noise_amplitude, 0.0, 1.0)
+            self.noise_multiplier = np.clip(new_noise_amplitude, 0.0, 1.0)
+
     def callback(
         self, outdata: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ) -> None:
@@ -194,6 +224,9 @@ class BinauralBeatGenerator:
         left = self._waveform_from_phase(phase_l, waveform)
         right = self._waveform_from_phase(phase_r, waveform)
 
+        left += self._generate_noise(self.noise_type, frames)
+        right += self._generate_noise(self.noise_type, frames)
+
         stereo = np.stack((left, right), axis=1).astype(np.float32) * amp
         outdata[:] = stereo
 
@@ -218,3 +251,27 @@ class BinauralBeatGenerator:
                 return signal.sawtooth(phase)
             case _:
                 raise ValueError(f"Invalid waveform: {waveform}")
+
+    def _generate_noise(self, kind: str, size: int) -> np.ndarray:
+        """
+        Generate colored noise using the `colorednoise` package.
+
+        Args:
+            kind (str): One of 'white', 'pink', 'brown'.
+            size (int): Number of samples.
+
+        Returns:
+            np.ndarray: Noise array scaled by self.noise_multiplier.
+        """
+        if kind == "white":
+            beta = 0  # White noise
+        elif kind == "pink":
+            beta = 1  # Pink noise
+        elif kind == "brown":
+            beta = 2  # Brownian noise
+        else:
+            return np.zeros(size)
+
+        noise = colorednoise.powerlaw_psd_gaussian(beta, size)
+        noise /= np.max(np.abs(noise) + 1e-8)  # Normalize
+        return noise * self.noise_multiplier

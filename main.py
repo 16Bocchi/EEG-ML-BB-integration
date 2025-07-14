@@ -25,6 +25,11 @@ def main():
     print("Changing frequencies to carrier=480Hz, beat=7Hz")
     gen.update_frequencies(new_carrier_freq=480, new_beat_freq=7)
 
+    # Add white noise
+    time.sleep(5)
+    print("Adding white noise")
+    gen.update_noise("white", 0.1, 0.5)
+
     # Change waveform after 5 seconds
     time.sleep(5)
     print("Changing waveform to 'square'")
