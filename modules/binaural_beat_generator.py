@@ -84,6 +84,9 @@ class BinauralBeatGenerator:
         self.lock = threading.Lock()
         self.stream = None
 
+    def __del__(self):
+        self.stop()
+
     def start(self) -> None:
         """
         Start the audio ouput stream
