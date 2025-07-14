@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "black>=25.1.0",
+    "colorednoise>=2.2.0",
     "numpy>=2.3.1",
     "pandas>=2.3.0",
     "pre-commit>=4.2.0",
