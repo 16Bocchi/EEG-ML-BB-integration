@@ -1,6 +1,6 @@
 import time
 
-from modules import binaural_beat_generator as bbg
+from classes import binaural_beat_generator as bbg
 
 
 def main():

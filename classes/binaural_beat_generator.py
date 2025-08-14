@@ -80,28 +80,28 @@ class BinauralBeatGenerator:
             noise_amplitude (float, default = 0.1): The amplitude of noise.
             noise_multipliter (float, default = 0.5): How noisy the noise should be.
         """
-        self.sample_rate = sample_rate
+        self._sample_rate = sample_rate
 
-        self.carrier_freq = carrier_freq
-        self.beat_freq = beat_freq
-        self.waveform = waveform
-        self.amplitude = amplitude
+        self._carrier_freq = carrier_freq
+        self._beat_freq = beat_freq
+        self._waveform = waveform
+        self._amplitude = amplitude
 
-        self.noise_type = noise_type
-        self.noise_amplitude = noise_amplitude
-        self.noise_multiplier = noise_multiplier
+        self._noise_type = noise_type
+        self._noise_amplitude = noise_amplitude
+        self._noise_multiplier = noise_multiplier
 
-        self.target_carrier_freq = carrier_freq
-        self.target_beat_freq = beat_freq
-        self.target_amplitude = amplitude
-        self.ramp_duration = ramp_duration
-        self.ramp_progress = 0.0
+        self._target_carrier_freq = carrier_freq
+        self._target_beat_freq = beat_freq
+        self._target_amplitude = amplitude
+        self._ramp_duration = ramp_duration
+        self._ramp_progress = 0.0
 
-        self.phase_left = 0
-        self.phase_right = 0
+        self._phase_left = 0
+        self._phase_right = 0
 
-        self.lock = threading.Lock()
-        self.stream = None
+        self._lock = threading.Lock()
+        self._stream = None
 
     def __del__(self):
         self.stop()
@@ -110,26 +110,26 @@ class BinauralBeatGenerator:
         """
         Start the audio ouput stream
         """
-        if self.stream is not None:
+        if self._stream is not None:
             return
-        self.stream = sd.OutputStream(
-            samplerate=self.sample_rate,
+        self._stream = sd.OutputStream(
+            samplerate=self._sample_rate,
             channels=2,
             callback=self.callback,
             dtype="float32",
         )
-        self.stream.start()
+        self._stream.start()
 
     def stop(self) -> None:
         """
         Stop the audio output stream and close resources
         """
-        if self.stream is not None:
-            self.stream.stop()
-            self.stream.close()
-        self.phase_left = 0
-        self.phase_right = 0
-        self.ramp_progress = 0.0
+        if self._stream is not None:
+            self._stream.stop()
+            self._stream.close()
+        self._phase_left = 0
+        self._phase_right = 0
+        self._ramp_progress = 0.0
 
     def update_frequencies(self, new_carrier_freq: float, new_beat_freq: float) -> None:
         """
@@ -139,10 +139,10 @@ class BinauralBeatGenerator:
             new_carrier_freq (float): New target carrier frequency in Hz.
             new_beat_freq (float): New target beat frequency in Hz.
         """
-        with self.lock:
-            self.target_carrier_freq = new_carrier_freq
-            self.target_beat_freq = new_beat_freq
-            self.ramp_progress = 0.0
+        with self._lock:
+            self._target_carrier_freq = new_carrier_freq
+            self._target_beat_freq = new_beat_freq
+            self._ramp_progress = 0.0
 
     def update_waveform(self, new_waveform: Literal["sine", "square", "saw"]) -> None:
         """
@@ -151,14 +151,14 @@ class BinauralBeatGenerator:
         Args:
             new_waveform (Literal["sine", "square", "saw"]): New waveform type.
         """
-        with self.lock:
-            self.waveform = new_waveform
+        with self._lock:
+            self._waveform = new_waveform
 
     def update_amplitude(self, new_amplitude: float) -> None:
         """Update target amplitude with ramp."""
-        with self.lock:
-            self.target_amplitude = max(0.0, min(new_amplitude, 1.0))  # Clamp 0..1
-            self.ramp_progress = 0.0
+        with self._lock:
+            self._target_amplitude = max(0.0, min(new_amplitude, 1.0))  # Clamp 0..1
+            self._ramp_progress = 0.0
 
     def update_noise(
         self,
@@ -166,10 +166,10 @@ class BinauralBeatGenerator:
         new_noise_amplitude: float = 0.1,
         new_noise_multiplier: float = 0.5,
     ) -> None:
-        with self.lock:
-            self.noise_type = new_noise_type
-            self.noise_amplitude = np.clip(new_noise_amplitude, 0.0, 1.0)
-            self.noise_multiplier = np.clip(new_noise_amplitude, 0.0, 1.0)
+        with self._lock:
+            self._noise_type = new_noise_type
+            self._noise_amplitude = np.clip(new_noise_amplitude, 0.0, 1.0)
+            self._noise_multiplier = np.clip(new_noise_multiplier, 0.0, 1.0)
 
     def callback(
         self, outdata: np.ndarray, frames: int, time, status: sd.CallbackFlags
@@ -187,45 +187,45 @@ class BinauralBeatGenerator:
         if status:
             print(status)
 
-        with self.lock:
+        with self._lock:
             # Smooth ramping
-            if self.ramp_duration > 0:
-                alpha = min(self.ramp_progress / self.ramp_duration, 1.0)
+            if self._ramp_duration > 0:
+                alpha = min(self._ramp_progress / self._ramp_duration, 1.0)
             else:
                 alpha = 1.0
 
-            freq = (1 - alpha) * self.carrier_freq + alpha * self.target_carrier_freq
-            beat = (1 - alpha) * self.beat_freq + alpha * self.target_beat_freq
-            amp = (1 - alpha) * self.amplitude + alpha * self.target_amplitude
+            freq = (1 - alpha) * self._carrier_freq + alpha * self._target_carrier_freq
+            beat = (1 - alpha) * self._beat_freq + alpha * self._target_beat_freq
+            amp = (1 - alpha) * self._amplitude + alpha * self._target_amplitude
 
-            self.ramp_progress += frames / self.sample_rate
+            self._ramp_progress += frames / self._sample_rate
 
             # Finalise ramp at end
             if alpha == 1.0:
-                self.carrier_freq = self.target_carrier_freq
-                self.beat_freq = self.target_beat_freq
-                self.amplitude = self.target_amplitude
+                self._carrier_freq = self._target_carrier_freq
+                self._beat_freq = self._target_beat_freq
+                self._amplitude = self._target_amplitude
 
-            waveform = self.waveform
+            waveform = self._waveform
 
         # Generate waveforms using phase accumulator
         left_freq = freq - beat / 2
         right_freq = freq + beat / 2
 
-        left_phase_inc = 2 * np.pi * left_freq / self.sample_rate
-        right_phase_inc = 2 * np.pi * right_freq / self.sample_rate
+        left_phase_inc = 2 * np.pi * left_freq / self._sample_rate
+        right_phase_inc = 2 * np.pi * right_freq / self._sample_rate
 
-        phase_l = self.phase_left + left_phase_inc * np.arange(frames)
-        phase_r = self.phase_right + right_phase_inc * np.arange(frames)
+        phase_l = self._phase_left + left_phase_inc * np.arange(frames)
+        phase_r = self._phase_right + right_phase_inc * np.arange(frames)
 
-        self.phase_left = (phase_l[-1] + left_phase_inc) % (2 * np.pi)
-        self.phase_right = (phase_r[-1] + right_phase_inc) % (2 * np.pi)
+        self._phase_left = (phase_l[-1] + left_phase_inc) % (2 * np.pi)
+        self._phase_right = (phase_r[-1] + right_phase_inc) % (2 * np.pi)
 
         left = self._waveform_from_phase(phase_l, waveform)
         right = self._waveform_from_phase(phase_r, waveform)
 
-        left += self._generate_noise(self.noise_type, frames)
-        right += self._generate_noise(self.noise_type, frames)
+        left += self._generate_noise(self._noise_type, frames)
+        right += self._generate_noise(self._noise_type, frames)
 
         stereo = np.stack((left, right), axis=1).astype(np.float32) * amp
         outdata[:] = stereo
@@ -261,7 +261,7 @@ class BinauralBeatGenerator:
             size (int): Number of samples.
 
         Returns:
-            np.ndarray: Noise array scaled by self.noise_multiplier.
+            np.ndarray: Noise array scaled by self._noise_multiplier.
         """
         if kind == "white":
             beta = 0  # White noise
@@ -274,4 +274,4 @@ class BinauralBeatGenerator:
 
         noise = colorednoise.powerlaw_psd_gaussian(beta, size)
         noise /= np.max(np.abs(noise) + 1e-8)  # Normalize
-        return noise * self.noise_multiplier
+        return noise * self._noise_multiplier
