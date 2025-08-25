@@ -161,7 +161,7 @@ class EEGXDFLoader:
         if self.raw_data is None:
             raise RuntimeError("Call select_streams() first.")
         self.raw_data.filter(l_freq, h_freq, fir_design="firwin")
-        self.raw_data.set_eeg_reference(reref)
+        self.raw_data.set_eeg_reference(reref, projection=True)
 
     def extract_events(self):
         """
