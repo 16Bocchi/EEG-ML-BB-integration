@@ -13,6 +13,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "pre-commit" },
+    { name = "pylsl" },
     { name = "pyxdf" },
     { name = "ruff" },
     { name = "scipy" },
@@ -27,6 +28,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.3.1" },
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "pylsl", specifier = ">=1.17.6" },
     { name = "pyxdf", specifier = ">=1.17.0" },
     { name = "ruff", specifier = ">=0.12.2" },
     { name = "scipy", specifier = ">=1.16.0" },
@@ -583,6 +585,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1d/b2/31537cf4b1ca988837256c910a668b553fceb8f069bedc4b1c826024b52c/pycparser-2.22.tar.gz", hash = "sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6", size = 172736, upload-time = "2024-03-30T13:22:22.564Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/13/a3/a812df4e2dd5696d1f351d58b8fe16a405b234ad2886a0dab9183fb78109/pycparser-2.22-py3-none-any.whl", hash = "sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc", size = 117552, upload-time = "2024-03-30T13:22:20.476Z" },
+]
+
+[[package]]
+name = "pylsl"
+version = "1.17.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3f/fd/2cb39e07d09f3aa40bc39d880adcc8bfa08fc9b8de993340e6a7555899f8/pylsl-1.17.6.tar.gz", hash = "sha256:8f3cea0c54a27785a43a27e9524f1dee885fe149f4703eed060168923b1695a3", size = 39856, upload-time = "2024-12-13T20:14:12.725Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9a/fa/38f3ec8ac9073e53c65d850d8d6f51cbb87dbfcb59db5215fe7c7584e6e5/pylsl-1.17.6-py2.py3-none-any.whl", hash = "sha256:78d935d3d944cd572464f6200fcdf3958866b2e3180dea3da83e43a19517acf5", size = 41775, upload-time = "2024-12-13T20:14:10.525Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/8d/0c8818c1a8aecc2a09d9f5df92b0bd321bd73f780c4928ccf0d5952951ad/pylsl-1.17.6-py2.py3-none-win32.whl", hash = "sha256:d9a68e86a073b59582b697c2baf1757b067da155e5fb017e30cefb7aa6d22f6d", size = 293781, upload-time = "2024-12-13T20:14:29.628Z" },
+    { url = "https://files.pythonhosted.org/packages/92/a9/b24df99c2dcb128a404dff05a592aa457763d45274c793395919b9b120a6/pylsl-1.17.6-py2.py3-none-win_amd64.whl", hash = "sha256:a5ead3e28ccdd7a08a6523adc797d6f737a1e446f684a8bd4818d784b50d89ba", size = 364212, upload-time = "2024-12-13T20:14:24.111Z" },
 ]
 
 [[package]]
